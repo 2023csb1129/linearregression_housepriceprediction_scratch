@@ -1,0 +1,84 @@
+# 📄 House Price Prediction using Multivariable Linear Regression
+# ------------------------------------------------------------
+
+# ## Importing libraries
+import numpy as np
+import matplotlib.pyplot as plt
+
+# ## Create sample dataset
+# Area (sq ft), Bedrooms, Age
+X = np.array([
+    [2100, 3, 20],
+    [1600, 2, 15],
+    [2400, 4, 30],
+    [1416, 2, 20],
+    [3000, 4, 8]
+])
+
+# Prices (in $1000s)
+y = np.array([400, 330, 369, 232, 540])
+
+# Number of samples
+m = y.shape[0]
+
+# ## Feature Scaling
+mu = np.mean(X, axis=0)
+sigma = np.std(X, axis=0)
+X_norm = (X - mu) / sigma
+
+# Add intercept term
+X_prep = np.hstack([np.ones((m, 1)), X_norm])
+
+# ## Initialize theta
+theta = np.zeros(X_prep.shape[1])
+
+# ## Cost function
+def compute_cost(X, y, theta):
+    m = y.shape[0]
+    predictions = X @ theta
+    cost = (1 / (2 * m)) * np.sum((predictions - y) ** 2)
+    return cost
+
+# ## Gradient Descent
+def gradient_descent(X, y, theta, alpha, num_iters):
+    m = y.shape[0]
+    J_history = []
+
+    for i in range(num_iters):
+        predictions = X @ theta
+        errors = predictions - y
+        theta = theta - (alpha / m) * (X.T @ errors)
+        J_history.append(compute_cost(X, y, theta))
+
+    return theta, J_history
+
+# ## Run gradient descent
+alpha = 0.1
+iterations = 100
+
+final_theta, J_history = gradient_descent(X_prep, y, theta, alpha, iterations)
+
+# ## Plot cost function history
+plt.plot(range(len(J_history)), J_history)
+plt.xlabel('Iterations')
+plt.ylabel('Cost')
+plt.title('Cost function decrease over iterations')
+plt.show()
+
+# ## Predict price for new house
+# Example: 2000 sq ft, 3 bedrooms, 15 years old
+new_house = np.array([2000, 3, 15])
+new_house_norm = (new_house - mu) / sigma
+new_house_prep = np.hstack([1, new_house_norm])
+
+predicted_price = new_house_prep @ final_theta
+
+print(f"Predicted price of the new house: ${predicted_price * 1000:.2f}")
+
+# ## Final theta values
+print("Learned parameters (theta):")
+print(final_theta)
+
+# ------------------------------------------------------------
+# ✨ Project ready to be added to your resume!
+# You can copy this as a Jupyter/Colab notebook and add Markdown explanations above each cell.
